@@ -4,12 +4,12 @@ const webpack = require('webpack')
 
 module.exports = function() {
   return {
-    devtool: 'sourcemap',
+    devtool: 'cheap-module-inline-sourcemap',
 
     entry: './bench/pool-performance',
 
     output: {
-      filename: 'main.js',
+      filename: '[name].js',
       path: path.resolve('build')
     },
 
@@ -17,15 +17,9 @@ module.exports = function() {
       new HTMLPlugin(),
       new webpack.optimize.ModuleConcatenationPlugin(),
       new webpack.EnvironmentPlugin({
-        NODE_ENV: 'production',
         DEBUG: false
       })
     ],
-
-    node: {
-      process: false,
-      global: false
-    },
 
     module: {
       loaders: [
@@ -40,6 +34,10 @@ module.exports = function() {
           }
         }
       ]
+    },
+
+    devServer: {
+      noInfo: true
     }
   }
 }

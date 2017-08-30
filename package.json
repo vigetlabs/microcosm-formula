@@ -4,7 +4,7 @@
   "main": "build/index.js",
   "license": "MIT",
   "scripts": {
-    "start": "webpack --watch",
+    "start": "webpack-dev-server",
     "format": "prettier --write src/**",
     "test": "jest"
   },
@@ -26,7 +26,7 @@
     "rollup-plugin-buble": "^0.15.0",
     "rollup-plugin-filesize": "^1.4.2",
     "rollup-plugin-uglify": "^2.0.1",
-    "webpack": "^3.5.5"
+    "webpack-dev-server": "^2.7.1"
   },
   "babel": {
     "presets": [
