@@ -77,7 +77,7 @@ describe('formula', function() {
       formula.update = jest.fn()
 
       formula.calculate(state)
-      formula.calculate({ ...state })
+      formula.calculate(Object.create(state))
 
       expect(formula.update).not.toHaveBeenCalled()
     })

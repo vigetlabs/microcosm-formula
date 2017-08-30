@@ -36,7 +36,8 @@
   "jest": {
     "testPathIgnorePatterns": [
       "node_modules",
-      "build"
+      "build",
+      "scripts"
     ]
   }
 }
