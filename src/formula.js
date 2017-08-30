@@ -4,15 +4,12 @@ import { mark, measure } from './profile'
 
 class Formula {
   constructor(...params) {
-    this.params = params
-    this.revision = 0
-    this.dependencies = this.track(...params)
-
     if (!this.constructor.cache) {
       this.constructor.cache = new Cache()
     }
 
-    this.cache = Cache.install(this)
+    this._dependencies = this.track(...params)
+    this._cache = Cache.install(this)
   }
 
   update() {
@@ -33,16 +30,16 @@ class Formula {
     mark('start')
 
     let args = this.parameterize(state, context)
-    let token = this.cache.hash(args)
+    let token = this._cache.hash(args)
 
-    if (this.cache.has(token)) {
-      this.value = this.cache.get(token)
+    if (this._cache.has(token)) {
+      this.value = this._cache.get(token)
     } else {
       this.value = this.compute(args)
 
       this.update(this.value, args, context)
 
-      this.cache.set(token, this.value)
+      this._cache.set(token, this.value)
     }
 
     mark('end')
@@ -62,24 +59,8 @@ class Formula {
   parameterize(state, context) {
     let params = {}
 
-    for (var key in this.dependencies) {
-      var value = this.dependencies[key]
-
-      if (value instanceof Formula) {
-        params[key] = value.call(null, state, context)
-      } else {
-        params[key] = value
-      }
-    }
-
-    return params
-  }
-
-  parameterizeArray(state, context) {
-    let params = {}
-
-    for (var key in this.dependencies) {
-      var value = this.dependencies[key]
+    for (var key in this._dependencies) {
+      var value = this._dependencies[key]
 
       if (value instanceof Formula) {
         params[key] = value.call(null, state, context)

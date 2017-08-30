@@ -5,11 +5,11 @@ export default class Select extends Formula {
   constructor(path) {
     super(...arguments)
 
-    this.path = path === '*' ? [] : path
+    this._path = path === '*' ? [] : path
   }
 
   calculate(state, context) {
-    this.value = get(state, this.path, null)
+    this.value = get(state, this._path, null)
 
     return this.value
   }

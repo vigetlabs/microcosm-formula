@@ -1,15 +1,14 @@
 MAKEFLAGS += -j 4
-SRC = $(shell find src -name '*.js*' | grep -v ".test")
 
-rollup = node_modules/.bin/rollup
-buble = node_modules/.bin/buble
+build: compile min es6
 
-build: $(SRC:src/%=lib/%)
-	@ $(rollup) --output.format cjs lib/formula.js > lib/formula.min.js
+compile:
+	@ ./scripts/build
 
-lib/%.js: src/%.js
-	@ mkdir -p lib
-	@ $(buble) --no modules $< > $@
-	@ echo "[+]" $@
+min:
+	@ ./scripts/build --minify --out=build/min
 
-.PHONY: bench
+es6:
+	@ ./scripts/build --format=es --out=build/es
+
+.PHONY: build compile min es

@@ -24,54 +24,55 @@ class Cache {
   }
 
   constructor() {
-    this.params = new Map()
-    this.answers = new Map()
-  }
-
-  clean() {
-    let diff = this.answers.size - LIMIT
-
-    if (diff > 0) {
-      let keys = this.answers.keys()
-
-      while (diff > 0) {
-        diff -= 1
-        this.answers.delete(keys.next().value)
-      }
-    }
-
-    this.frame = null
-  }
-
-  queueClean() {
-    if (!this.frame && this.answers.size > LIMIT) {
-      this.frame = delayedJob(this.clean, this)
-    }
+    this._params = new Map()
+    this._answers = new Map()
   }
 
   hash(components) {
-    return hashcode(components, this.params)
+    return hashcode(components, this._params)
   }
 
   has(key) {
-    return this.answers.has(key)
+    return this._answers.has(key)
   }
 
   get(key) {
-    let value = this.answers.get(key)
+    let value = this._answers.get(key)
 
     // Maps are ordered, so stick the value at the end to prioritize
     // frequently used formulas
-    this.answers.delete(key)
-    this.answers.set(key, value)
+    this._answers.delete(key)
+    this._answers.set(key, value)
 
     return value
   }
 
   set(key, answer) {
-    this.answers.set(key, answer)
-    this.last = answer
-    this.queueClean()
+    this._answers.set(key, answer)
+    this._queueClean()
+  }
+
+  // Private
+
+  _clean() {
+    let diff = this._answers.size - LIMIT
+
+    if (diff > 0) {
+      let keys = this._answers.keys()
+
+      while (diff > 0) {
+        diff -= 1
+        this._answers.delete(keys.next().value)
+      }
+    }
+
+    this._frame = null
+  }
+
+  _queueClean() {
+    if (!this._frame && this._answers.size > LIMIT) {
+      this._frame = delayedJob(this._clean, this)
+    }
   }
 }
 
