@@ -25,21 +25,24 @@ We created this abstraction in response to the following challenges:
 
 The primary flow for a formula is three parts:
 
-1. `track`: Determine the "variables" for a formula. This is a list of values or other Formulas.
-2. `compute`: After reducing `track` down into a list of arguments, this function returns a single computed value. This is the value passed into a Presenter or another Formula.
+1. `track`: Determine the "variables" for a formula. This is an object of values or references to other Formulas.
+2. `compute`: After resolving dependencies in `track`, this function returns a single computed value. This is the value passed into a Presenter or another Formula.
 3. `update`: Triggers when a new answer is found. You can use this hook to push actions if data is missing.
 
 ```javascript
 class Gizmoz extends Formula {
   track() {
-    return [ select('gizmos'), new Query('weight')]
+    return { 
+      gizmos: select('gizmos'), 
+      query: new Query('weight')
+    }
   }
   
   compute(assets, query) {
     return gizmos.filter(gizmo => gizmo.weight <= query.weight)
   }
   
-  update (result, [ gizmos, query ], repo) {
+  update (result, { gizmos, query }, repo) {
     if (gizmos.length <= 0) {
       repo.push(getGizmos)
     }
@@ -128,7 +131,7 @@ Creates a new formula. Parameters sent into the Formula are passed to the `track
 ```javascript
 class Widget extends Formula {
   track(id) {
-    return [ id ]
+    return { id }
   }
   // ...
 }
@@ -140,11 +143,11 @@ new Widget(2) // id in track will be 2
 
 Used to determine the parameters to pass into the `compute()` method. `params` come directly from instantiation arguments. 
 
-The return value of this function should be a list of values or other formulas.
+The return value of this function should be an object of values or other formulas.
 
 #### compute(...values)
 
-A formula reduces the list returned from `track` into values. It then invokes `compute` with that list. The return value of this function is passed along to other Formulas or Presenters.
+A formula reduces the object returned from `track` into values. It then invokes `compute` with that list. The return value of this function is passed along to other Formulas or Presenters.
 
 #### update(repo, computed, ...values)
 
@@ -185,10 +188,13 @@ import { select } from 'lib/formula'
 
 class FocusedAsset extends Formula {
   track() {
-    return [ select('assets'), select('ui.focus') ]
+    return { 
+      asset: select('assets'), 
+      focus: select('ui.focus') 
+    }
   }
   
-  compute(assets, focus) {
+  compute({ assets, focus }) {
     return assets.find(asset => asset.id === focus)
   }
 }

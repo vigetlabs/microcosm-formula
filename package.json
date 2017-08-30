@@ -54,8 +54,5 @@
       "lib",
       "node_modules"
     ]
-  },
-  "dependencies": {
-    "uid": "^0.0.2"
   }
 }

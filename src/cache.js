@@ -68,8 +68,9 @@ class Cache {
     return value
   }
 
-  set(key, formula) {
-    this.answers.set(key, formula)
+  set(key, answer) {
+    this.answers.set(key, answer)
+    this.last = answer
     this.queueClean()
   }
 }
