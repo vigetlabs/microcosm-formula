@@ -6,25 +6,36 @@
  * map maintains a translation of object references to unique string keys.
  */
 
-import uid from 'uid'
+function isObject(value) {
+  return value !== null && typeof value === 'object'
+}
 
-function generateKey(parameterCache, value) {
-  if (value != null && typeof value === 'object') {
-    if (parameterCache.has(value) === false) {
-      parameterCache.set(value, 'object-' + uid())
-    }
-
-    return parameterCache.get(value)
+function generateKey(value, cache) {
+  if (isObject(value) === false) {
+    return value
   }
 
-  return value
+  if (cache.has(value) === false) {
+    var key = 'o' + cache.size
+    cache.set(value, key)
+    return key
+  }
+
+  return cache.get(value)
 }
 
 export default function hashcode(values, cache) {
-  let key = ''
-  for (var i = 0, len = values.length; i < len; i++) {
-    key += '-' + generateKey(cache, values[i])
+  let code = ''
+
+  if (Array.isArray(values)) {
+    for (var i = 0, len = values.length; i < len; i++) {
+      code += '-' + generateKey(values[i], cache)
+    }
+  } else {
+    for (var key in values) {
+      code += '-' + generateKey(values[key], cache)
+    }
   }
 
-  return `$${key}`
+  return `$${code}`
 }

@@ -13,28 +13,30 @@ function delayedJob(fn, scope) {
 }
 
 class Cache {
-  static install(target) {
-    let cache = new Cache()
+  static install(instance) {
+    let target = instance.constructor.prototype
 
-    target.constructor.prototype._formula_cache = cache
+    if (!target._formula_cache) {
+      target.constructor.prototype._formula_cache = new Cache()
+    }
 
-    return cache
+    return target._formula_cache
   }
 
   constructor() {
-    this.parameterCache = new Map()
-    this.map = new Map()
+    this.params = new Map()
+    this.answers = new Map()
   }
 
   clean() {
-    let diff = this.map.size - LIMIT
+    let diff = this.answers.size - LIMIT
 
     if (diff > 0) {
-      let keys = this.map.keys()
+      let keys = this.answers.keys()
 
       while (diff > 0) {
         diff -= 1
-        this.map.delete(keys.next().value)
+        this.answers.delete(keys.next().value)
       }
     }
 
@@ -42,32 +44,32 @@ class Cache {
   }
 
   queueClean() {
-    if (!this.frame && this.map.size > LIMIT) {
+    if (!this.frame && this.answers.size > LIMIT) {
       this.frame = delayedJob(this.clean, this)
     }
   }
 
   hash(components) {
-    return hashcode(components, this.parameterCache)
+    return hashcode(components, this.params)
   }
 
   has(key) {
-    return this.map.has(key)
+    return this.answers.has(key)
   }
 
   get(key) {
-    let value = this.map.get(key)
+    let value = this.answers.get(key)
 
     // Maps are ordered, so stick the value at the end to prioritize
     // frequently used formulas
-    this.map.delete(key)
-    this.map.set(key, value)
+    this.answers.delete(key)
+    this.answers.set(key, value)
 
     return value
   }
 
   set(key, formula) {
-    this.map.set(key, formula)
+    this.answers.set(key, formula)
     this.queueClean()
   }
 }

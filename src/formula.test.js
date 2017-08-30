@@ -17,10 +17,10 @@ describe('formula', function() {
 
     class Purple extends Formula {
       track() {
-        return [new Red(), new Blue()]
+        return { red: new Red(), blue: new Blue() }
       }
 
-      compute(red, blue) {
+      compute({ red, blue }) {
         return { r: red.r, b: blue.b, g: 0 }
       }
     }
@@ -32,25 +32,25 @@ describe('formula', function() {
 
   it('is callable like a function', function() {
     class Callable extends Formula {
-      track(...params) {
-        return params
+      track(params) {
+        return { params }
       }
     }
 
     let formula = new Callable('one')
 
-    expect(formula.call(null, {})).toEqual('one')
+    expect(formula.call(null, {})).toEqual({ params: 'one' })
   })
 
-  it('is applyable like a function', function() {
+  it('is appliable like a function', function() {
     class Appliable extends Formula {
-      track(...params) {
-        return params
+      track(params) {
+        return { params }
       }
     }
     let formula = new Appliable('one')
 
-    expect(formula.apply(null, [{}])).toEqual('one')
+    expect(formula.apply(null, [{}])).toEqual({ params: 'one' })
   })
 
   describe('select', function() {
@@ -80,6 +80,23 @@ describe('formula', function() {
       formula.calculate({ ...state })
 
       expect(formula.update).not.toHaveBeenCalled()
+    })
+
+    it('can track dependencies an object', function() {
+      class Name extends Formula {
+        track({ prefix }) {
+          return { prefix, name: select('name') }
+        }
+
+        compute({ prefix, name }) {
+          return prefix + ' ' + name
+        }
+      }
+
+      let name = new Name({ prefix: 'Sir' })
+      let answer = name.calculate({ name: 'Bob' })
+
+      expect(answer).toBe('Sir Bob')
     })
   })
 })

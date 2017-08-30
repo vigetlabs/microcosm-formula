@@ -19,12 +19,12 @@ class Formula {
     // Abstract. Implement this method inside of children
   }
 
-  track() {
-    return []
+  track(params) {
+    return { params }
   }
 
-  compute() {
-    return arguments.length ? arguments[0] : null
+  compute(args) {
+    return args
   }
 
   // Private
@@ -32,15 +32,15 @@ class Formula {
   calculate(state, context) {
     mark('start')
 
-    let components = this.parameterize(state, context)
-    let token = this.cache.hash(this, components)
+    let args = this.parameterize(state, context)
+    let token = this.cache.hash(args)
 
     if (this.cache.has(token)) {
       this.value = this.cache.get(token)
     } else {
-      this.value = this.compute.apply(this, components)
+      this.value = this.compute(args)
 
-      this.update(this.value, components, context)
+      this.update(this.value, args, context)
 
       this.cache.set(token, this.value)
     }
@@ -60,16 +60,31 @@ class Formula {
   }
 
   parameterize(state, context) {
-    let len = this.dependencies.length
-    let params = Array(len)
+    let params = {}
 
-    for (var i = 0; i < len; i++) {
-      var value = this.dependencies[i]
+    for (var key in this.dependencies) {
+      var value = this.dependencies[key]
 
       if (value instanceof Formula) {
-        params[i] = value.call(null, state, context)
+        params[key] = value.call(null, state, context)
       } else {
-        params[i] = value
+        params[key] = value
+      }
+    }
+
+    return params
+  }
+
+  parameterizeArray(state, context) {
+    let params = {}
+
+    for (var key in this.dependencies) {
+      var value = this.dependencies[key]
+
+      if (value instanceof Formula) {
+        params[key] = value.call(null, state, context)
+      } else {
+        params[key] = value
       }
     }
 
