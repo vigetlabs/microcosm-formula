@@ -12,7 +12,7 @@ class Formula {
     this._cache = Cache.install(this)
   }
 
-  update() {
+  update(value, params, context) {
     // Abstract. Implement this method inside of children
   }
 
