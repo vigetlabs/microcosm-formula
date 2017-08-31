@@ -70,18 +70,6 @@ describe('formula', function() {
       expect(answer).toEqual(state)
     })
 
-    it('never calls update', function() {
-      let state = { style: { color: 'blue' } }
-      let formula = select('style.color')
-
-      formula.update = jest.fn()
-
-      formula.calculate(state)
-      formula.calculate(Object.create(state))
-
-      expect(formula.update).not.toHaveBeenCalled()
-    })
-
     it('can track dependencies an object', function() {
       class Name extends Formula {
         track({ prefix }) {

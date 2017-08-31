@@ -12,7 +12,7 @@ class Formula {
     this._cache = Cache.install(this)
   }
 
-  update(value, params, context) {
+  update(value, params, repo) {
     // Abstract. Implement this method inside of children
   }
 
@@ -26,44 +26,45 @@ class Formula {
 
   // Private
 
-  calculate(state, context) {
+  calculate(state, repo) {
     mark('start')
 
-    let args = this.parameterize(state, context)
+    let args = this.parameterize(state, repo)
     let token = this._cache.hash(args)
+    let value = null
 
     if (this._cache.has(token)) {
-      this.value = this._cache.get(token)
+      value = this._cache.get(token)
     } else {
-      this.value = this.compute(args)
+      value = this.compute(args, { repo, state })
 
-      this.update(this.value, args, context)
+      this.update(value, args, repo)
 
-      this._cache.set(token, this.value)
+      this._cache.set(token, value)
     }
 
     mark('end')
     measure('Calculated ' + this.constructor.name, 'start', 'end')
 
-    return this.value
+    return value
   }
 
   apply(_scope, args) {
     return this.calculate.apply(this, args)
   }
 
-  call(_scope, state, context) {
-    return this.calculate(state, context)
+  call(_scope, state, repo) {
+    return this.calculate(state, repo)
   }
 
-  parameterize(state, context) {
+  parameterize(state, repo) {
     let params = {}
 
     for (var key in this._dependencies) {
       var value = this._dependencies[key]
 
       if (value instanceof Formula) {
-        params[key] = value.call(null, state, context)
+        params[key] = value.call(null, state, repo)
       } else {
         params[key] = value
       }
